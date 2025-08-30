@@ -46,17 +46,30 @@ class AIManager:
         ]
         # Keywords indicating a need for reasoning, creativity, or deep understanding
         analysis_keywords = [
-            'explain', 'what is', 'how does', 'why', 'analyze', 'summarize', 'write', 'create', 'generate', 'website', 'code'
+            'explain', 'what is', 'how does', 'why', 'analyze', 'summarize', 'write', 'create', 'generate'
         ]
         # Keywords indicating user needs help or has issues
         help_keywords = [
             'help', 'not working', 'does not work', 'error', 'problem', 'issue', 'fix', 'broken',
             'not running', 'failed', 'troubleshoot', 'debug', 'what went wrong'
         ]
+        # Specialized task types
+        web_content_keywords = [
+            'website', 'web', 'html', 'css', 'page', 'site', 'frontend', 'ui', 'design'
+        ]
+        code_generation_keywords = [
+            'code', 'script', 'program', 'function', 'class', 'algorithm', 'logic', 'software'
+        ]
 
         prompt_lower = prompt.lower()
         
-        # Check for help/issue keywords first
+        # Check for specialized task types first
+        if any(keyword in prompt_lower for keyword in web_content_keywords):
+            return 'web_content'
+        if any(keyword in prompt_lower for keyword in code_generation_keywords):
+            return 'code_generation'
+        
+        # Check for help/issue keywords
         if any(keyword in prompt_lower for keyword in help_keywords):
             return 'analysis'  # Help requests need detailed analysis
             
