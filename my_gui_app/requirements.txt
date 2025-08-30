@@ -1,0 +1,7 @@
+# GUI Application Dependencies
+# Most dependencies are built-in with Python
+        
+# Optional: Install these for enhanced GUI experience
+# pip install pillow  # For image handling
+# pip install customtkinter  # For modern-looking widgets
+# pip install tkinter-tooltip  # For tooltips
