@@ -1,0 +1,74 @@
+# 🚀 Unified AI Shell Web Interface - Python Dependencies
+
+# Core Web Framework
+Flask==3.0.0
+Flask-SocketIO==5.3.6
+Flask-Login==0.6.3
+Werkzeug==3.0.1
+
+# WebSocket and Real-time Communication
+python-socketio==5.10.0
+python-engineio==4.8.0
+
+# Voice Recognition and Audio Processing
+SpeechRecognition==3.10.0
+pydub==0.25.1
+PyAudio==0.2.11
+
+# System Monitoring and Control
+psutil==5.9.6
+GPUtil==1.4.0
+
+# Image and Video Processing
+opencv-python==4.8.1.78
+numpy==1.24.3
+Pillow==10.0.1
+
+# Data Processing and Analysis
+pandas==2.0.3
+matplotlib==3.7.2
+seaborn==0.12.2
+
+# Security and Authentication
+bcrypt==4.0.1
+cryptography==41.0.4
+
+# Network and HTTP
+requests==2.31.0
+urllib3==2.0.4
+
+# File and Data Handling
+python-magic==0.4.27
+mimetypes-magic==0.1.0
+
+# Development and Testing
+pytest==7.4.2
+pytest-flask==1.3.0
+pytest-cov==4.1.0
+
+# Production Deployment
+gunicorn==21.2.0
+gevent==23.7.0
+gevent-websocket==0.10.1
+
+# Environment and Configuration
+python-dotenv==1.0.0
+PyYAML==6.0.1
+
+# Additional Utilities
+click==8.1.7
+itsdangerous==2.1.2
+Jinja2==3.1.2
+MarkupSafe==2.1.3
+
+# Performance and Caching
+redis==5.0.0
+celery==5.3.4
+
+# Monitoring and Logging
+structlog==23.1.0
+colorama==0.4.6
+
+# Note: Some packages may require system-level dependencies
+# For Ubuntu/Debian: sudo apt-get install portaudio19-dev python3-dev
+# For CentOS/RHEL: sudo yum install portaudio-devel python3-devel

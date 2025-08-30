@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Unified AI Shell - Web Control Center</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Prism.js for code highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+    
+    <!-- Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+</head>
+<body class="bg-dark text-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-robot me-2"></i>
+                <strong>Unified AI Shell v5.0</strong>
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-1"></i>{{ current_user.username }}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="showSettings()">
+                            <i class="fas fa-cog me-2"></i>Settings
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <!-- Left Sidebar - Quick Actions -->
+            <div class="col-md-3">
+                <div class="card bg-secondary border-0 mb-3">
+                    <div class="card-header bg-primary">
+                        <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success btn-sm" onclick="executeCommand('ls -la')">
+                                <i class="fas fa-list me-1"></i>List Files
+                            </button>
+                            <button class="btn btn-info btn-sm" onclick="executeCommand('pwd')">
+                                <i class="fas fa-folder me-1"></i>Current Directory
+                            </button>
+                            <button class="btn btn-warning btn-sm" onclick="executeCommand('ps aux | head -10')">
+                                <i class="fas fa-tasks me-1"></i>Process List
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="executeCommand('df -h')">
+                                <i class="fas fa-hdd me-1"></i>Disk Usage
+                            </button>
+                            <button class="btn btn-primary btn-sm" onclick="showSystemStatus()">
+                                <i class="fas fa-chart-line me-1"></i>System Status
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voice Control Panel -->
+                <div class="card bg-secondary border-0 mb-3">
+                    <div class="card-header bg-success">
+                        <h6 class="mb-0"><i class="fas fa-microphone me-2"></i>Voice Control</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <button id="voiceBtn" class="btn btn-success btn-lg rounded-circle" onclick="toggleVoiceRecognition()">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <div class="mt-2">
+                                <small class="text-muted">Click to start voice recognition</small>
+                            </div>
+                        </div>
+                        
+                        <div id="voiceStatus" class="alert alert-info d-none">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <span id="voiceStatusText">Listening...</span>
+                        </div>
+                        
+                        <div id="voiceTranscription" class="d-none">
+                            <label class="form-label">Transcribed Text:</label>
+                            <textarea id="transcribedText" class="form-control form-control-sm" rows="3" readonly></textarea>
+                            <button class="btn btn-primary btn-sm mt-2" onclick="executeVoiceCommand()">
+                                <i class="fas fa-play me-1"></i>Execute
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Chat Panel -->
+                <div class="card bg-secondary border-0 mb-3">
+                    <div class="card-header bg-info">
+                        <h6 class="mb-0"><i class="fas fa-brain me-2"></i>AI Assistant</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <input type="text" id="aiMessage" class="form-control form-control-sm" 
+                                   placeholder="Ask AI anything..." onkeypress="handleAIEnter(event)">
+                        </div>
+                        <button class="btn btn-info btn-sm w-100" onclick="sendAIMessage()">
+                            <i class="fas fa-paper-plane me-1"></i>Send
+                        </button>
+                        
+                        <div id="aiResponse" class="mt-3 d-none">
+                            <div class="border rounded p-2 bg-dark">
+                                <small class="text-muted">AI Response:</small>
+                                <div id="aiResponseText" class="mt-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Terminal Area -->
+            <div class="col-md-6">
+                <div class="card bg-dark border-0">
+                    <div class="card-header bg-dark border-bottom">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-terminal me-2"></i>Terminal Control
+                            </h6>
+                            <div>
+                                <button class="btn btn-outline-light btn-sm me-2" onclick="clearTerminal()">
+                                    <i class="fas fa-trash me-1"></i>Clear
+                                </button>
+                                <button class="btn btn-outline-light btn-sm" onclick="downloadHistory()">
+                                    <i class="fas fa-download me-1"></i>Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-0">
+                        <!-- Terminal Output Display -->
+                        <div id="terminalOutput" class="terminal-window p-3">
+                            <div class="terminal-line">
+                                <span class="prompt">🚀 AI Shell></span>
+                                <span class="text">Welcome to Unified AI Shell Web Interface!</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="prompt">🚀 AI Shell></span>
+                                <span class="text">Type commands below or use voice control to interact with your system.</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Command Input -->
+                        <div class="terminal-input-area p-3 border-top">
+                            <div class="input-group">
+                                <span class="input-group-text bg-primary text-white">
+                                    <i class="fas fa-terminal"></i>
+                                </span>
+                                <input type="text" id="commandInput" class="form-control bg-dark text-light border-0" 
+                                       placeholder="Enter command here..." onkeypress="handleCommandEnter(event)">
+                                <button class="btn btn-primary" onclick="executeCommandFromInput()">
+                                    <i class="fas fa-play me-1"></i>Execute
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Manager -->
+                <div class="card bg-secondary border-0 mt-3">
+                    <div class="card-header bg-dark">
+                        <h6 class="mb-0"><i class="fas fa-folder-open me-2"></i>File Manager</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col">
+                                <input type="text" id="filePath" class="form-control form-control-sm" 
+                                       value="/workspace" onkeypress="handlePathEnter(event)">
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-primary btn-sm" onclick="listFiles()">
+                                    <i class="fas fa-sync me-1"></i>Refresh
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="fileList" class="file-list">
+                            <!-- Files will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar - System Monitoring -->
+            <div class="col-md-3">
+                <!-- System Status -->
+                <div class="card bg-secondary border-0 mb-3">
+                    <div class="card-header bg-warning">
+                        <h6 class="mb-0"><i class="fas fa-server me-2"></i>System Status</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">CPU Usage</label>
+                            <div class="progress">
+                                <div id="cpuProgress" class="progress-bar bg-success" role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Memory Usage</label>
+                            <div class="progress">
+                                <div id="memoryProgress" class="progress-bar bg-info" role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Disk Usage</label>
+                            <div class="progress">
+                                <div id="diskProgress" class="progress-bar bg-warning" role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <small class="text-muted">Last updated: <span id="lastUpdate">-</span></small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Process Monitor -->
+                <div class="card bg-secondary border-0 mb-3">
+                    <div class="card-header bg-danger">
+                        <h6 class="mb-0"><i class="fas fa-tasks me-2"></i>Active Processes</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="processList" class="process-list">
+                            <!-- Processes will be loaded here -->
+                        </div>
+                        <button class="btn btn-outline-light btn-sm w-100 mt-2" onclick="refreshProcesses()">
+                            <i class="fas fa-sync me-1"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Network Status -->
+                <div class="card bg-secondary border-0 mb-3">
+                    <div class="card-header bg-success">
+                        <h6 class="mb-0"><i class="fas fa-network-wired me-2"></i>Network</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <small class="text-muted">Local IP:</small>
+                            <div id="localIP">Loading...</div>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">External IP:</small>
+                            <div id="externalIP">Loading...</div>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">Port Status:</small>
+                            <div class="badge bg-success">5000 (Web)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-cog me-2"></i>Settings</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Terminal Theme</label>
+                        <select id="terminalTheme" class="form-select bg-dark text-light">
+                            <option value="dark">Dark Theme</option>
+                            <option value="light">Light Theme</option>
+                            <option value="matrix">Matrix Theme</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Auto-refresh Interval (seconds)</label>
+                        <input type="number" id="refreshInterval" class="form-control bg-dark text-light" value="5" min="1" max="60">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="autoScroll" checked>
+                            <label class="form-check-label">Auto-scroll terminal</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSettings()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Viewer Modal -->
+    <div class="modal fade" id="fileViewerModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-file-code me-2"></i>File Viewer</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <input type="text" id="filePathDisplay" class="form-control bg-dark text-light" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <textarea id="fileContent" class="form-control bg-dark text-light" rows="20" readonly></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="editFile()">Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
