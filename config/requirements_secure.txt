@@ -1,0 +1,67 @@
+# Secure Key Management Dependencies
+# ==================================
+
+# Core security packages
+keyring>=24.0.0          # System keyring integration
+cryptography>=41.0.0     # Encryption and hashing
+
+# Optional but recommended
+# These packages enhance security and functionality
+
+# For better keyring support on different platforms
+secretstorage>=3.3.0     # Linux secret service backend
+keyrings.alt>=4.2.0      # Alternative keyring backends
+
+# For additional encryption features
+pycryptodome>=3.19.0     # Additional cryptographic algorithms
+
+# For secure random number generation
+secrets>=1.0.0           # Python secrets module (built-in in Python 3.6+)
+
+# For secure password input
+getpass>=1.0.0           # Secure password input (built-in)
+
+# For configuration management
+configparser>=5.0.0      # Configuration file parsing (built-in in Python 3.2+)
+
+# For logging
+logging>=0.5.1.2         # Logging (built-in)
+
+# For path handling
+pathlib>=1.0.1           # Path handling (built-in in Python 3.4+)
+
+# For type hints
+typing>=3.7.4.3          # Type hints (built-in in Python 3.5+)
+
+# For JSON handling
+json>=2.0.9              # JSON (built-in)
+
+# For base64 encoding
+base64>=1.2.1             # Base64 encoding (built-in)
+
+# For hashing
+hashlib>=20081119         # Hashing (built-in)
+
+# For OS operations
+os>=0.1.3                 # OS operations (built-in)
+
+# For system operations
+sys>=0.1.0                # System operations (built-in)
+
+# For regular expressions
+re>=2.2.1                 # Regular expressions (built-in)
+
+# For subprocess management
+subprocess>=0.1.0         # Subprocess management (built-in)
+
+# For platform detection
+platform>=1.0.8           # Platform detection (built-in)
+
+# For random number generation
+random>=1.1               # Random number generation (built-in)
+
+# For secrets generation
+secrets>=1.0.0            # Secrets generation (built-in in Python 3.6+)
+
+# Note: Most packages listed above are built-in Python modules
+# Only keyring, cryptography, and optional packages need to be installed
