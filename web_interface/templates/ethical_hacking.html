@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔒 Enhanced Ethical Hacking Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+    <style>
+        .security-card {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            transition: transform 0.3s ease;
+        }
+        .security-card:hover {
+            transform: translateY(-5px);
+        }
+        .vulnerability-high { background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); }
+        .vulnerability-medium { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .vulnerability-low { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .scan-progress {
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.2);
+        }
+        .scan-progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #00ff88, #00d4ff);
+            transition: width 0.3s ease;
+        }
+        .network-map {
+            background: #0f0f23;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 400px;
+        }
+        .host-node {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            line-height: 60px;
+            margin: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .host-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+        }
+        .host-node.vulnerable {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        }
+        .host-node.safe {
+            background: linear-gradient(135deg, #00ff88 0%, #00d4ff 100%);
+        }
+        .tool-panel {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            backdrop-filter: blur(10px);
+        }
+        .command-input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 8px;
+        }
+        .command-input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+        .scan-controls {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .btn-scan {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+        .btn-scan:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-stop {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        }
+        .real-time-updates {
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .update-item {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.1);
+            border-left: 3px solid #00ff88;
+        }
+        .update-item.warning {
+            border-left-color: #ffaa00;
+        }
+        .update-item.error {
+            border-left-color: #ff416c;
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1><i class="fas fa-shield-alt"></i> Enhanced Ethical Hacking Dashboard</h1>
+                    <div class="d-flex gap-3">
+                        <button class="btn btn-outline-light" onclick="location.href='/'">
+                            <i class="fas fa-arrow-left"></i> Back to Main
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="stopAllScans()">
+                            <i class="fas fa-stop"></i> Stop All Scans
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="security-card p-4">
+                    <h4><i class="fas fa-bolt"></i> Quick Actions</h4>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <button class="btn btn-scan w-100 mb-2" onclick="quickScan('127.0.0.1')">
+                                <i class="fas fa-search"></i> Localhost Scan
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-scan w-100 mb-2" onclick="quickScan('192.168.1.1/24')">
+                                <i class="fas fa-network-wired"></i> Network Scan
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-scan w-100 mb-2" onclick="vulnerabilityScan('127.0.0.1')">
+                                <i class="fas fa-bug"></i> Vulnerability Test
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-scan w-100 mb-2" onclick="reconnaissance('127.0.0.1')">
+                                <i class="fas fa-eye"></i> Reconnaissance
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row">
+            <!-- Left Column - Scanning Tools -->
+            <div class="col-md-8">
+                <!-- Network Scanner -->
+                <div class="security-card p-4 mb-4">
+                    <h4><i class="fas fa-globe"></i> Network Scanner</h4>
+                    <div class="tool-panel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Target IP/Range:</label>
+                                <input type="text" class="form-control command-input" id="networkTarget" 
+                                       placeholder="e.g., 192.168.1.1/24" value="127.0.0.1/32">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Scan Type:</label>
+                                <select class="form-select command-input" id="scanType">
+                                    <option value="quick">Quick Scan</option>
+                                    <option value="comprehensive" selected>Comprehensive</option>
+                                    <option value="stealth">Stealth</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="scan-controls">
+                            <button class="btn btn-scan" onclick="startNetworkScan()">
+                                <i class="fas fa-play"></i> Start Scan
+                            </button>
+                            <button class="btn btn-stop" onclick="stopNetworkScan()">
+                                <i class="fas fa-stop"></i> Stop
+                            </button>
+                        </div>
+                        <div class="scan-progress mb-3">
+                            <div class="scan-progress-bar" id="networkScanProgress" style="width: 0%"></div>
+                        </div>
+                        <div class="real-time-updates" id="networkScanUpdates">
+                            <div class="update-item">Ready to start network scan...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vulnerability Scanner -->
+                <div class="security-card p-4 mb-4">
+                    <h4><i class="fas fa-bug"></i> Vulnerability Scanner</h4>
+                    <div class="tool-panel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Target:</label>
+                                <input type="text" class="form-control command-input" id="vulnTarget" 
+                                       placeholder="IP address or domain" value="127.0.0.1">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Scan Type:</label>
+                                <select class="form-select command-input" id="vulnScanType">
+                                    <option value="quick">Quick</option>
+                                    <option value="comprehensive" selected>Comprehensive</option>
+                                    <option value="web">Web Application</option>
+                                    <option value="network">Network Services</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="scan-controls">
+                            <button class="btn btn-scan" onclick="startVulnerabilityScan()">
+                                <i class="fas fa-search"></i> Start Scan
+                            </button>
+                            <button class="btn btn-stop" onclick="stopVulnerabilityScan()">
+                                <i class="fas fa-stop"></i> Stop
+                            </button>
+                        </div>
+                        <div class="real-time-updates" id="vulnScanUpdates">
+                            <div class="update-item">Ready to start vulnerability scan...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Engineering & Reconnaissance -->
+                <div class="security-card p-4 mb-4">
+                    <h4><i class="fas fa-user-secret"></i> Social Engineering & Reconnaissance</h4>
+                    <div class="tool-panel">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <label class="form-label">Target Domain/IP:</label>
+                                <input type="text" class="form-control command-input" id="reconTarget" 
+                                       placeholder="Domain or IP address" value="example.com">
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-scan w-100" onclick="startReconnaissance()">
+                                    <i class="fas fa-eye"></i> Gather Intel
+                                </button>
+                            </div>
+                        </div>
+                        <div class="real-time-updates" id="reconUpdates">
+                            <div class="update-item">Ready to gather reconnaissance data...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Results & Monitoring -->
+            <div class="col-md-4">
+                <!-- Active Scans -->
+                <div class="security-card p-4 mb-4">
+                    <h4><i class="fas fa-tasks"></i> Active Scans</h4>
+                    <div id="activeScans">
+                        <div class="update-item">No active scans</div>
+                    </div>
+                </div>
+
+                <!-- System Status -->
+                <div class="security-card p-4 mb-4">
+                    <h4><i class="fas fa-chart-line"></i> System Status</h4>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <div class="h4" id="cpuUsage">--</div>
+                                <small>CPU Usage</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <div class="h4" id="memoryUsage">--</div>
+                                <small>Memory Usage</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <div class="h4" id="networkTraffic">--</div>
+                                <small>Network (MB/s)</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <div class="h4" id="activeConnections">--</div>
+                                <small>Active Connections</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Commands -->
+                <div class="security-card p-4 mb-4">
+                    <h4><i class="fas fa-terminal"></i> Quick Commands</h4>
+                    <div class="tool-panel">
+                        <input type="text" class="form-control command-input mb-2" id="quickCommand" 
+                               placeholder="Enter command...">
+                        <button class="btn btn-scan w-100" onclick="executeQuickCommand()">
+                            <i class="fas fa-play"></i> Execute
+                        </button>
+                        <div class="mt-3">
+                            <small class="text-muted">Common commands:</small>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                <span class="badge bg-secondary" onclick="setCommand('nmap -sS -sV 127.0.0.1')">nmap</span>
+                                <span class="badge bg-secondary" onclick="setCommand('ping -c 4 127.0.0.1')">ping</span>
+                                <span class="badge bg-secondary" onclick="setCommand('traceroute 8.8.8.8')">traceroute</span>
+                                <span class="badge bg-secondary" onclick="setCommand('netstat -tuln')">netstat</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="security-card p-4">
+                    <h4><i class="fas fa-chart-bar"></i> Scan Results</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Network Map</h6>
+                            <div class="network-map" id="networkMap">
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-network-wired fa-3x mb-3"></i>
+                                    <p>Start a network scan to see the network map</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Vulnerability Summary</h6>
+                            <div id="vulnerabilitySummary">
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-shield-alt fa-3x mb-3"></i>
+                                    <p>Start a vulnerability scan to see results</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.0/socket.io.js"></script>
+    <script>
+        // Global variables
+        let activeScans = {};
+        let socket = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSocket();
+            startSystemMonitoring();
+            loadActiveScans();
+        });
+
+        function initializeSocket() {
+            socket = io();
+            
+            socket.on('connect', function() {
+                console.log('Connected to server');
+                addUpdate('networkScanUpdates', 'Connected to server', 'success');
+            });
+
+            socket.on('scan_update', function(data) {
+                handleScanUpdate(data);
+            });
+
+            socket.on('vulnerability_result', function(data) {
+                displayVulnerabilityResults(data);
+            });
+
+            socket.on('reconnaissance_result', function(data) {
+                displayReconnaissanceResults(data);
+            });
+        }
+
+        function startSystemMonitoring() {
+            setInterval(() => {
+                fetch('/api/system/status')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('cpuUsage').textContent = data.cpu.percent + '%';
+                        document.getElementById('memoryUsage').textContent = data.memory.percent + '%';
+                        document.getElementById('networkTraffic').textContent = 
+                            Math.round((data.network.bytes_sent + data.network.bytes_recv) / (1024 * 1024) * 100) / 100;
+                        document.getElementById('activeConnections').textContent = data.processes.count;
+                    })
+                    .catch(error => console.error('Error fetching system status:', error));
+            }, 5000);
+        }
+
+        function startNetworkScan() {
+            const target = document.getElementById('networkTarget').value;
+            const scanType = document.getElementById('scanType').value;
+            
+            if (!target) {
+                alert('Please enter a target IP/range');
+                return;
+            }
+
+            addUpdate('networkScanUpdates', `Starting ${scanType} scan of ${target}...`, 'info');
+            
+            fetch('/api/ethical-hacking/network-scan', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({target, scan_type: scanType})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.scan_id) {
+                    activeScans[data.scan_id] = {type: 'network', target, status: 'running'};
+                    updateActiveScans();
+                    addUpdate('networkScanUpdates', `Scan started with ID: ${data.scan_id}`, 'success');
+                } else {
+                    addUpdate('networkScanUpdates', `Scan failed: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                addUpdate('networkScanUpdates', `Error: ${error.message}`, 'error');
+            });
+        }
+
+        function startVulnerabilityScan() {
+            const target = document.getElementById('vulnTarget').value;
+            const scanType = document.getElementById('vulnScanType').value;
+            
+            if (!target) {
+                alert('Please enter a target');
+                return;
+            }
+
+            addUpdate('vulnScanUpdates', `Starting ${scanType} vulnerability scan of ${target}...`, 'info');
+            
+            fetch('/api/ethical-hacking/vulnerability-scan', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({target, scan_type: scanType})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.scan_id) {
+                    activeScans[data.scan_id] = {type: 'vulnerability', target, status: 'running'};
+                    updateActiveScans();
+                    addUpdate('vulnScanUpdates', `Vulnerability scan started with ID: ${data.scan_id}`, 'success');
+                } else {
+                    addUpdate('vulnScanUpdates', `Scan failed: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                addUpdate('vulnScanUpdates', `Error: ${error.message}`, 'error');
+            });
+        }
+
+        function startReconnaissance() {
+            const target = document.getElementById('reconTarget').value;
+            
+            if (!target) {
+                alert('Please enter a target');
+                return;
+            }
+
+            addUpdate('reconUpdates', `Starting reconnaissance of ${target}...`, 'info');
+            
+            fetch('/api/ethical-hacking/reconnaissance', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({target})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addUpdate('reconUpdates', `Reconnaissance completed for ${target}`, 'success');
+                    displayReconnaissanceResults(data);
+                } else {
+                    addUpdate('reconUpdates', `Reconnaissance failed: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                addUpdate('reconUpdates', `Error: ${error.message}`, 'error');
+            });
+        }
+
+        function quickScan(target) {
+            document.getElementById('networkTarget').value = target;
+            startNetworkScan();
+        }
+
+        function vulnerabilityScan(target) {
+            document.getElementById('vulnTarget').value = target;
+            startVulnerabilityScan();
+        }
+
+        function reconnaissance(target) {
+            document.getElementById('reconTarget').value = target;
+            startReconnaissance();
+        }
+
+        function stopAllScans() {
+            Object.keys(activeScans).forEach(scanId => {
+                stopScan(scanId);
+            });
+        }
+
+        function stopScan(scanId) {
+            fetch('/api/ethical-hacking/stop-scan', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({scan_id: scanId})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    delete activeScans[scanId];
+                    updateActiveScans();
+                    addUpdate('networkScanUpdates', `Scan ${scanId} stopped`, 'warning');
+                }
+            })
+            .catch(error => console.error('Error stopping scan:', error));
+        }
+
+        function executeQuickCommand() {
+            const command = document.getElementById('quickCommand').value;
+            if (!command) return;
+
+            addUpdate('networkScanUpdates', `Executing: ${command}`, 'info');
+            
+            fetch('/api/terminal/execute', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({command})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addUpdate('networkScanUpdates', `Command executed successfully`, 'success');
+                } else {
+                    addUpdate('networkScanUpdates', `Command failed: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                addUpdate('networkScanUpdates', `Error: ${error.message}`, 'error');
+            });
+
+            document.getElementById('quickCommand').value = '';
+        }
+
+        function setCommand(cmd) {
+            document.getElementById('quickCommand').value = cmd;
+        }
+
+        function addUpdate(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const updateItem = document.createElement('div');
+            updateItem.className = `update-item ${type}`;
+            updateItem.innerHTML = `<small>${new Date().toLocaleTimeString()}</small> ${message}`;
+            
+            container.appendChild(updateItem);
+            container.scrollTop = container.scrollHeight;
+            
+            // Keep only last 50 updates
+            while (container.children.length > 50) {
+                container.removeChild(container.firstChild);
+            }
+        }
+
+        function handleScanUpdate(data) {
+            const {scan_id, type, progress, status, message} = data;
+            
+            if (type === 'network') {
+                document.getElementById('networkScanProgress').style.width = progress + '%';
+                addUpdate('networkScanUpdates', message, status);
+            } else if (type === 'vulnerability') {
+                addUpdate('vulnScanUpdates', message, status);
+            }
+            
+            if (status === 'completed' || status === 'failed') {
+                if (activeScans[scan_id]) {
+                    activeScans[scan_id].status = status;
+                    updateActiveScans();
+                }
+            }
+        }
+
+        function displayVulnerabilityResults(data) {
+            const container = document.getElementById('vulnerabilitySummary');
+            
+            if (data.vulnerabilities && data.vulnerabilities.length > 0) {
+                let html = `<div class="mb-3">
+                    <h6>Risk Score: <span class="badge ${data.risk_score > 70 ? 'bg-danger' : data.risk_score > 40 ? 'bg-warning' : 'bg-success'}">${data.risk_score}/100</span></h6>
+                </div>`;
+                
+                data.vulnerabilities.forEach(vuln => {
+                    const severityClass = vuln.severity === 'High' ? 'vulnerability-high' : 
+                                        vuln.severity === 'Medium' ? 'vulnerability-medium' : 'vulnerability-low';
+                    
+                    html += `<div class="tool-panel ${severityClass} mb-2">
+                        <strong>${vuln.type}</strong> - ${vuln.description}
+                        <br><small>Severity: ${vuln.severity}</small>
+                    </div>`;
+                });
+                
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<div class="text-center text-success"><i class="fas fa-check-circle fa-2x"></i><p>No vulnerabilities found</p></div>';
+            }
+        }
+
+        function displayReconnaissanceResults(data) {
+            const container = document.getElementById('vulnerabilitySummary');
+            
+            let html = '<h6>Reconnaissance Results</h6>';
+            
+            if (data.dns_info) {
+                html += `<div class="tool-panel mb-2">
+                    <strong>DNS Information</strong><br>
+                    <small>IP: ${data.dns_info.ip_address || 'N/A'}</small>
+                </div>`;
+            }
+            
+            if (data.subdomains && data.subdomains.length > 0) {
+                html += `<div class="tool-panel mb-2">
+                    <strong>Subdomains Found: ${data.subdomains.length}</strong><br>
+                    <small>${data.subdomains.slice(0, 3).map(s => s.subdomain).join(', ')}${data.subdomains.length > 3 ? '...' : ''}</small>
+                </div>`;
+            }
+            
+            if (data.technologies && data.technologies.length > 0) {
+                html += `<div class="tool-panel mb-2">
+                    <strong>Technologies Detected: ${data.technologies.length}</strong><br>
+                    <small>${data.technologies.slice(0, 3).join(', ')}${data.technologies.length > 3 ? '...' : ''}</small>
+                </div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function updateActiveScans() {
+            const container = document.getElementById('activeScans');
+            
+            if (Object.keys(activeScans).length === 0) {
+                container.innerHTML = '<div class="update-item">No active scans</div>';
+                return;
+            }
+            
+            let html = '';
+            Object.entries(activeScans).forEach(([scanId, scan]) => {
+                const statusClass = scan.status === 'running' ? 'success' : scan.status === 'completed' ? 'info' : 'warning';
+                html += `<div class="update-item ${statusClass}">
+                    <strong>${scan.type}</strong> - ${scan.target}<br>
+                    <small>Status: ${scan.status} | ID: ${scanId}</small>
+                    ${scan.status === 'running' ? `<button class="btn btn-sm btn-outline-danger ms-2" onclick="stopScan('${scanId}')">Stop</button>` : ''}
+                </div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function loadActiveScans() {
+            fetch('/api/ethical-hacking/active-scans')
+            .then(response => response.json())
+            .then(data => {
+                if (data.scans) {
+                    activeScans = data.scans;
+                    updateActiveScans();
+                }
+            })
+            .catch(error => console.error('Error loading active scans:', error));
+        }
+    </script>
+</body>
+</html>

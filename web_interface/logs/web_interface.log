@@ -1,0 +1,57 @@
+2025-08-30 21:33:08,964 - engineio.server - INFO - Server initialized for threading.
+2025-08-30 21:34:00,143 - engineio.server - INFO - Server initialized for threading.
+2025-08-30 21:34:03,930 - engineio.server - INFO - Server initialized for threading.
+2025-08-30 21:34:04,118 - __main__ - INFO - 🚀 Starting Enhanced Unified AI Shell Web Interface...
+2025-08-30 21:34:04,118 - __main__ - INFO - 📱 Access at: http://localhost:5000
+2025-08-30 21:34:04,118 - __main__ - INFO - 🔐 Default login: admin / admin123
+2025-08-30 21:34:04,118 - __main__ - INFO - 🛡️ Enhanced security and error handling enabled
+2025-08-30 21:34:04,119 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.30.0.2:5000
+2025-08-30 21:34:04,119 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-30 21:34:05,118 - socketio.server - INFO - emitting event "system_update" to all [/]
+2025-08-30 21:34:11,119 - socketio.server - INFO - emitting event "system_update" to all [/]
+2025-08-30 21:34:17,120 - socketio.server - INFO - emitting event "system_update" to all [/]
+2025-08-30 21:34:23,121 - socketio.server - INFO - emitting event "system_update" to all [/]
+2025-08-30 21:34:29,122 - socketio.server - INFO - emitting event "system_update" to all [/]
+2025-08-30 21:34:33,735 - __main__ - INFO - Shutdown signal received, cleaning up...
+2025-08-30 21:34:33,736 - __main__ - ERROR - Failed to start web interface: Working outside of request context.
+
+This typically means that you attempted to use functionality that needed
+an active HTTP request. Consult the documentation on testing for
+information about how to avoid this problem.
+2025-08-30 21:38:36,871 - engineio.server - INFO - Server initialized for threading.
+2025-08-30 22:04:57,980 - engineio.server - INFO - Server initialized for threading.
+2025-08-30 22:04:58,202 - enhanced_terminal_manager - INFO - Terminal settings saved
+2025-08-30 22:04:58,202 - enhanced_terminal_manager - ERROR - Error in process monitor: 'EnhancedTerminalManager' object has no attribute '_detect_hung_processes'
+2025-08-30 22:04:58,202 - enhanced_terminal_manager - INFO - Monitoring threads started
+2025-08-30 22:05:15,241 - engineio.server - INFO - Server initialized for threading.
+2025-08-30 22:05:15,486 - enhanced_terminal_manager - INFO - Terminal settings saved
+2025-08-30 22:05:15,486 - enhanced_terminal_manager - INFO - Monitoring threads started
+2025-08-30 22:06:33,800 - engineio.server - INFO - Server initialized for threading.
+2025-08-30 22:06:34,009 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.30.0.2:5000
+2025-08-30 22:06:34,009 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-30 22:06:37,014 - werkzeug - INFO - 127.0.0.1 - - [30/Aug/2025 22:06:37] "GET /login HTTP/1.1" 200 -
+2025-08-30 22:06:37,017 - werkzeug - INFO - 127.0.0.1 - - [30/Aug/2025 22:06:37] "[33mGET /dashboard HTTP/1.1[0m" 404 -
+2025-08-30 22:07:56,855 - engineio.server - INFO - Server initialized for threading.
+2025-08-30 22:07:57,065 - __main__ - INFO - 🚀 Starting Enhanced Unified AI Shell Web Interface...
+2025-08-30 22:07:57,065 - __main__ - INFO - 📱 Access at: http://localhost:5000
+2025-08-30 22:07:57,065 - __main__ - INFO - 🔐 Default login: admin / admin123
+2025-08-30 22:07:57,065 - __main__ - INFO - 🛡️ Enhanced security and error handling enabled
+2025-08-30 22:07:57,066 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.30.0.2:5000
+2025-08-30 22:07:57,066 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-30 22:07:58,065 - socketio.server - INFO - emitting event "system_update" to all [/]
+2025-08-30 22:08:04,066 - socketio.server - INFO - emitting event "system_update" to all [/]
+2025-08-30 22:08:06,379 - __main__ - INFO - Shutdown signal received, cleaning up...
+2025-08-30 22:08:06,379 - __main__ - ERROR - Failed to start web interface: Working outside of request context.
+
+This typically means that you attempted to use functionality that needed
+an active HTTP request. Consult the documentation on testing for
+information about how to avoid this problem.
